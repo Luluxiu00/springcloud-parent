@@ -1,0 +1,21 @@
+server:
+  port: 8081
+spring:
+  application:
+    name: producer
+  devtools:
+    restart:
+      additional-paths: src/main/java
+      exclude: static/**,public/**
+eureka:
+  client:
+    fetchRegistry: true
+    register-with-eureka: true
+    serviceUrl:
+      defaultZone: http://eureka1:8761/eureka/,http://eureka2:8762/eureka/,http://eureka3:8763/eureka/
+  instance:
+    status-page-url: http://192.168.1.7:${server.port}/swagger-ui.html # ${server.port}为该服务的端口号
+    instance-id: ${spring.cloud.client.ipAddress}:${server.port}
+    prefer-ip-address: true
+    
+

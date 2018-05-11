@@ -1,0 +1,64 @@
+#  eureka server 高可用 配置  要点  eureka.instance.prefer-ip-address 不建议设置为true
+#  eureka.client.registerWithEureka、 eureka.client.fetchRegistry 都要设置为true   默认值都为true
+#  eureka.instance.appname  =spring.application.name
+#  重要  defaultZone  高可用 不要使用ip  应该使用dns 也就是 eureka.instance.hostname  指定dns
+#  本配置文件支持HA集群  3个实例组成三角关系   eg  8761->8762->8763->8761
+
+
+# 公共配置
+spring:
+  application:
+    name: eureka-cluster
+#  默认启动 master 配置
+eureka:
+  instance:
+    appname: eureka-cluster
+# 页面显示ip:端口    
+    instance-id: ${spring.cloud.client.ipAddress}:${server.port}
+  client:
+#   向服务注册中心注册  默认为true  此处为了着重强调一下
+    register-with-eureka: true
+#    检索服务 默认为true  此处为了着重强调一下
+    fetch-registry: true
+
+# master 配置
+---
+server:
+  port: 8761
+spring:
+  profiles: eureka1
+eureka:
+  instance:
+# 此处应指定为dns 不使用 IP 或者localhost  
+    hostname: eureka1
+  client:
+    serviceUrl:
+      defaultZone: http://eureka3:8763/eureka/,http://eureka2:8762/eureka/
+
+# eureka2 配置
+---
+server:
+  port: 8762
+spring:
+  profiles: eureka2
+eureka:
+  instance:
+# 此处应指定为dns 不使用 IP 或者localhost
+    hostname: eureka2
+  client:
+    serviceUrl:
+      defaultZone: http://eureka3:8763/eureka/,http://eureka1:8761/eureka/
+
+# eureka3 配置
+---
+server:
+  port: 8763
+spring:
+  profiles: eureka3
+eureka:
+  instance:
+# 此处应指定为dns 不使用 IP 或者localhost
+    hostname: eureka3
+  client:
+    serviceUrl:
+      defaultZone: http://eureka2:8762/eureka/,http://eureka1:8761/eureka/
